@@ -7,6 +7,7 @@ import (
 	"log"
 
 	_ "github.com/glebarez/go-sqlite"
+	"github.com/pressly/goose/v3"
 	"github.com/ratludu/momento/internal/database"
 	"github.com/spf13/cobra"
 )
@@ -30,6 +31,14 @@ to quickly create a Cobra application.`,
 		defer db.Close()
 
 		queries := database.New(db)
+
+		if err := goose.SetDialect("sqlite"); err != nil {
+			log.Fatal(err)
+		}
+
+		if err := goose.Up(db, "./sql/schema"); err != nil {
+			log.Fatal(err)
+		}
 
 		name, _ := cmd.Flags().GetString("add")
 		if name == "" {
