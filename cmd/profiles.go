@@ -4,10 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
+
 	_ "github.com/glebarez/go-sqlite"
 	"github.com/ratludu/momento/internal/database"
 	"github.com/spf13/cobra"
-	"log"
 )
 
 // profilesCmd represents the profiles command

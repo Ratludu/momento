@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const dbPath = "./sql/schema/momento.db"
+const dbPath = "sql/schema/momento.db"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
