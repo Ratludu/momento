@@ -9,8 +9,19 @@ import (
 )
 
 type Profile struct {
-	ID          int64     `json:"id"`
-	ProfileName string    `json:"profile_name"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID             int64     `json:"id"`
+	ProfileName    string    `json:"profile_name"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	CurrentProfile int64     `json:"current_profile"`
+}
+
+type Session struct {
+	ID        int64       `json:"id"`
+	ProfileID int64       `json:"profile_id"`
+	CreatedAt time.Time   `json:"created_at"`
+	UpdatedAt time.Time   `json:"updated_at"`
+	Note      interface{} `json:"note"`
+	Start     string      `json:"start"`
+	End       interface{} `json:"end"`
 }

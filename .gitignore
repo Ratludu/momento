@@ -33,3 +33,4 @@ go.work.sum
 
 
 ./sql/schema/momento.db
+./mnt

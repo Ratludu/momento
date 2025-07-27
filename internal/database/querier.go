@@ -10,7 +10,12 @@ import (
 
 type Querier interface {
 	AddProfile(ctx context.Context, profileName string) (Profile, error)
+	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	GetAllProfiles(ctx context.Context) ([]Profile, error)
+	GetCurrentProfile(ctx context.Context) (Profile, error)
+	ResetCurrentProfile(ctx context.Context) error
+	ResetProfiles(ctx context.Context) error
+	SetCurrentProfile(ctx context.Context, profileName string) (Profile, error)
 }
 
 var _ Querier = (*Queries)(nil)

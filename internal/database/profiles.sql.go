@@ -14,7 +14,7 @@ INSERT INTO profiles (profile_name)
 VALUES (
 	?
 	)
-RETURNING id, profile_name, created_at, updated_at
+RETURNING id, profile_name, created_at, updated_at, current_profile
 `
 
 func (q *Queries) AddProfile(ctx context.Context, profileName string) (Profile, error) {
@@ -25,12 +25,13 @@ func (q *Queries) AddProfile(ctx context.Context, profileName string) (Profile, 
 		&i.ProfileName,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.CurrentProfile,
 	)
 	return i, err
 }
 
 const getAllProfiles = `-- name: GetAllProfiles :many
-SELECT id, profile_name, created_at, updated_at FROM profiles
+SELECT id, profile_name, created_at, updated_at, current_profile FROM profiles
 `
 
 func (q *Queries) GetAllProfiles(ctx context.Context) ([]Profile, error) {
@@ -47,6 +48,7 @@ func (q *Queries) GetAllProfiles(ctx context.Context) ([]Profile, error) {
 			&i.ProfileName,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.CurrentProfile,
 		); err != nil {
 			return nil, err
 		}
@@ -59,4 +61,61 @@ func (q *Queries) GetAllProfiles(ctx context.Context) ([]Profile, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const getCurrentProfile = `-- name: GetCurrentProfile :one
+SELECT id, profile_name, created_at, updated_at, current_profile FROM profiles
+WHERE current_profile = 1
+`
+
+func (q *Queries) GetCurrentProfile(ctx context.Context) (Profile, error) {
+	row := q.db.QueryRowContext(ctx, getCurrentProfile)
+	var i Profile
+	err := row.Scan(
+		&i.ID,
+		&i.ProfileName,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.CurrentProfile,
+	)
+	return i, err
+}
+
+const resetCurrentProfile = `-- name: ResetCurrentProfile :exec
+UPDATE profiles
+SET current_profile = 0
+`
+
+func (q *Queries) ResetCurrentProfile(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, resetCurrentProfile)
+	return err
+}
+
+const resetProfiles = `-- name: ResetProfiles :exec
+DELETE FROM profiles
+`
+
+func (q *Queries) ResetProfiles(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, resetProfiles)
+	return err
+}
+
+const setCurrentProfile = `-- name: SetCurrentProfile :one
+UPDATE profiles
+SET current_profile = 1
+WHERE profile_name = ?
+RETURNING id, profile_name, created_at, updated_at, current_profile
+`
+
+func (q *Queries) SetCurrentProfile(ctx context.Context, profileName string) (Profile, error) {
+	row := q.db.QueryRowContext(ctx, setCurrentProfile, profileName)
+	var i Profile
+	err := row.Scan(
+		&i.ID,
+		&i.ProfileName,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.CurrentProfile,
+	)
+	return i, err
 }

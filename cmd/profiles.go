@@ -7,7 +7,6 @@ import (
 	"log"
 
 	_ "github.com/glebarez/go-sqlite"
-	"github.com/pressly/goose/v3"
 	"github.com/ratludu/momento/internal/database"
 	"github.com/spf13/cobra"
 )
@@ -15,14 +14,18 @@ import (
 // profilesCmd represents the profiles command
 var profilesCmd = &cobra.Command{
 	Use:   "profiles",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Show all profiles that have been registered.",
+	Long: `Default is to show all profiles that have been regisered for a user. 
+For example:
+mnt profiles
+- work
+- study (current)
+- personal project
+	`,
 	Run: func(cmd *cobra.Command, args []string) {
+
+		dbPath := GetDbPath()
+
 		db, err := sql.Open("sqlite", dbPath)
 		if err != nil {
 			log.Fatal(err)
@@ -32,26 +35,10 @@ to quickly create a Cobra application.`,
 
 		queries := database.New(db)
 
-		if err := goose.SetDialect("sqlite"); err != nil {
-			log.Fatal(err)
-		}
-
-		if err := goose.Up(db, "./sql/schema"); err != nil {
-			log.Fatal(err)
-		}
-
 		name, _ := cmd.Flags().GetString("add")
-		if name == "" {
+		set, _ := cmd.Flags().GetString("set")
 
-			profiles, err := queries.GetAllProfiles(context.Background())
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			for i := range profiles {
-				fmt.Println(profiles[i].ProfileName)
-			}
-		} else {
+		if name != "" {
 			profile, err := queries.AddProfile(context.Background(), name)
 			if err != nil {
 				log.Fatal(err)
@@ -59,12 +46,42 @@ to quickly create a Cobra application.`,
 			fmt.Println("Profile Created")
 			fmt.Println(profile)
 		}
+
+		if set != "" {
+			err := queries.ResetCurrentProfile(context.Background())
+			if err != nil {
+				log.Fatal("Cannot reset current profile.")
+			}
+
+			current, err := queries.SetCurrentProfile(context.Background(), set)
+			if err != nil {
+				log.Fatal("Could not find profile, please make sure to register it first")
+			}
+
+			fmt.Printf("INFO: %s has been set as your current profile.\n", current.ProfileName)
+		}
+
+		profiles, err := queries.GetAllProfiles(context.Background())
+		if err != nil {
+			log.Fatal(err, dbPath)
+		}
+
+		fmt.Println("Profiles:")
+		for i := range profiles {
+
+			if profiles[i].CurrentProfile == 1 {
+				fmt.Println("	-", profiles[i].ProfileName, "(current)")
+			} else {
+				fmt.Println("	-", profiles[i].ProfileName)
+			}
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(profilesCmd)
 	profilesCmd.Flags().StringP("add", "a", "", "Add a new profile with name")
+	profilesCmd.Flags().StringP("set", "s", "", "Set which profile you want to use")
 
 	// Here you will define your flags and configuration settings.
 
