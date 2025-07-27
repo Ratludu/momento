@@ -17,11 +17,11 @@ type Profile struct {
 }
 
 type Session struct {
-	ID        int64       `json:"id"`
-	ProfileID int64       `json:"profile_id"`
-	CreatedAt time.Time   `json:"created_at"`
-	UpdatedAt time.Time   `json:"updated_at"`
-	Note      interface{} `json:"note"`
-	Start     string      `json:"start"`
-	End       interface{} `json:"end"`
+	ID        int64     `json:"id"`
+	ProfileID int64     `json:"profile_id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Note      string    `json:"note"`
+	Start     string    `json:"start"`
+	End       string    `json:"end"`
 }

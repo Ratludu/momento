@@ -17,7 +17,7 @@ WHERE end = "EMPTY"
 RETURNING id, profile_id, created_at, updated_at, note, start, "end"
 `
 
-func (q *Queries) CloseSession(ctx context.Context, end interface{}) (Session, error) {
+func (q *Queries) CloseSession(ctx context.Context, end string) (Session, error) {
 	row := q.db.QueryRowContext(ctx, closeSession, end)
 	var i Session
 	err := row.Scan(
@@ -43,9 +43,9 @@ RETURNING id, profile_id, created_at, updated_at, note, start, "end"
 `
 
 type CreateSessionParams struct {
-	ProfileID int64       `json:"profile_id"`
-	Note      interface{} `json:"note"`
-	Start     string      `json:"start"`
+	ProfileID int64  `json:"profile_id"`
+	Note      string `json:"note"`
+	Start     string `json:"start"`
 }
 
 func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error) {

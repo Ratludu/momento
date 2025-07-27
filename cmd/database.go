@@ -4,7 +4,15 @@ import (
 	"log"
 	"time"
 
+	"fmt"
 	"github.com/spf13/viper"
+)
+
+const (
+	sqliteLayoutSimple      = "2006-01-02 15:04:05"     // Example: "2025-07-27 18:35:45"
+	sqliteLayoutMillis      = "2006-01-02 15:04:05.000" // Example: "2025-07-27 18:35:45.123"
+	sqliteLayoutRFC3339     = time.RFC3339              // Example: "2025-07-27T18:35:45+10:00"
+	sqliteLayoutRFC3339Nano = time.RFC3339Nano          // Example: "2025-07-27T18:35:45.123456789+10:00"
 )
 
 func GetDbPath() string {
@@ -18,7 +26,25 @@ func GetDbPath() string {
 }
 
 func ConvertTime(t time.Time) string {
-	sqliteLayout := "2006-01-02 15:04:05.000"
-	newFormat := t.Format(sqliteLayout)
+	newFormat := t.Format(sqliteLayoutMillis)
 	return newFormat
+}
+
+func ParseTime(timeStr string) (time.Time, error) {
+
+	layoutsToTry := []string{
+		sqliteLayoutRFC3339Nano,
+		sqliteLayoutRFC3339,
+		sqliteLayoutMillis,
+		sqliteLayoutSimple,
+	}
+
+	for _, layout := range layoutsToTry {
+		t, err := time.Parse(layout, timeStr)
+		if err == nil {
+			return t, nil
+		}
+	}
+
+	return time.Time{}, fmt.Errorf("could not parse time string '%s' with any known layout", timeStr)
 }

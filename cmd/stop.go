@@ -43,9 +43,15 @@ to quickly create a Cobra application.`,
 			log.Fatal(err)
 		}
 
+		sTime, _ := ParseTime(session.Start)
+		eTime, _ := ParseTime(session.End)
+
+		timeSpent := eTime.Sub(sTime)
+
 		fmt.Println("Stopped Session:", session.Note)
 		fmt.Println("	- Start:", session.Start)
 		fmt.Println("	- End:", session.End)
+		fmt.Printf("	- Duration: %.2f minutes\n", timeSpent.Minutes())
 
 	},
 }
