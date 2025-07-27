@@ -38,29 +38,46 @@ to quickly create a Cobra application.`,
 
 		queries := database.New(db)
 
+		session, err := queries.GetSessions(context.Background())
+		if len(session) != 0 {
+			fmt.Printf("Session: %s is still open! Please close it before starting a new one :)\n", session[0].Note)
+			return
+		}
+
 		profile, err := queries.GetCurrentProfile(context.Background())
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		startTime := ConvertTime(time.Now())
+		tag, err := cmd.Flags().GetString("tag")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if tag == "" {
+			tag = "misc"
+		}
 
 		result, err := queries.CreateSession(context.Background(), database.CreateSessionParams{
 			ProfileID: profile.ID,
 			Start:     startTime,
-			Note:      "myNote",
+			Note:      tag,
 		})
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		fmt.Println(result)
-
+		fmt.Println("Starting", tag, "...")
+		fmt.Println("	- Profile:", profile.ProfileName)
+		fmt.Println("	- Start time:", result.Start)
+		fmt.Println("Lock In!")
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(startCmd)
+	startCmd.Flags().StringP("tag", "t", "", "Add a tag to track e.g. course name. Default is misc")
 
 	// Here you will define your flags and configuration settings.
 

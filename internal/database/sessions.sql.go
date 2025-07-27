@@ -9,6 +9,29 @@ import (
 	"context"
 )
 
+const closeSession = `-- name: CloseSession :one
+UPDATE sessions
+SET updated_at = DATETIME('now'),
+end = ?
+WHERE end = "EMPTY"
+RETURNING id, profile_id, created_at, updated_at, note, start, "end"
+`
+
+func (q *Queries) CloseSession(ctx context.Context, end interface{}) (Session, error) {
+	row := q.db.QueryRowContext(ctx, closeSession, end)
+	var i Session
+	err := row.Scan(
+		&i.ID,
+		&i.ProfileID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Note,
+		&i.Start,
+		&i.End,
+	)
+	return i, err
+}
+
 const createSession = `-- name: CreateSession :one
 INSERT INTO sessions (profile_id, note, start)
 VALUES (
@@ -38,4 +61,48 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) (S
 		&i.End,
 	)
 	return i, err
+}
+
+const getSessions = `-- name: GetSessions :many
+SELECT id, profile_id, created_at, updated_at, note, start, "end" FROM sessions WHERE end = "EMPTY"
+`
+
+func (q *Queries) GetSessions(ctx context.Context) ([]Session, error) {
+	rows, err := q.db.QueryContext(ctx, getSessions)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Session
+	for rows.Next() {
+		var i Session
+		if err := rows.Scan(
+			&i.ID,
+			&i.ProfileID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Note,
+			&i.Start,
+			&i.End,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const resetSessions = `-- name: ResetSessions :exec
+DELETE FROM sessions
+`
+
+func (q *Queries) ResetSessions(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, resetSessions)
+	return err
 }

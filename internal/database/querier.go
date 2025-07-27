@@ -10,11 +10,14 @@ import (
 
 type Querier interface {
 	AddProfile(ctx context.Context, profileName string) (Profile, error)
+	CloseSession(ctx context.Context, end interface{}) (Session, error)
 	CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error)
 	GetAllProfiles(ctx context.Context) ([]Profile, error)
 	GetCurrentProfile(ctx context.Context) (Profile, error)
+	GetSessions(ctx context.Context) ([]Session, error)
 	ResetCurrentProfile(ctx context.Context) error
 	ResetProfiles(ctx context.Context) error
+	ResetSessions(ctx context.Context) error
 	SetCurrentProfile(ctx context.Context, profileName string) (Profile, error)
 }
 

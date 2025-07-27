@@ -6,17 +6,19 @@ package cmd
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
+	"time"
 
 	_ "github.com/glebarez/go-sqlite"
 	"github.com/ratludu/momento/internal/database"
 	"github.com/spf13/cobra"
 )
 
-// resetCmd represents the reset command
-var resetCmd = &cobra.Command{
-	Use:   "reset",
-	Short: "Reset the current database",
+// stopCmd represents the stop command
+var stopCmd = &cobra.Command{
+	Use:   "stop",
+	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -35,28 +37,29 @@ to quickly create a Cobra application.`,
 
 		queries := database.New(db)
 
-		err = queries.ResetSessions(context.Background())
+		endTime := ConvertTime(time.Now())
+		session, err := queries.CloseSession(context.Background(), endTime)
 		if err != nil {
-			log.Fatal("Could not reset sessions table.")
+			log.Fatal(err)
 		}
 
-		err = queries.ResetProfiles(context.Background())
-		if err != nil {
-			log.Fatal("Could not reset profiles table.")
-		}
+		fmt.Println("Stopped Session:", session.Note)
+		fmt.Println("	- Start:", session.Start)
+		fmt.Println("	- End:", session.End)
+
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(resetCmd)
+	rootCmd.AddCommand(stopCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// resetCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// stopCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// resetCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// stopCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
