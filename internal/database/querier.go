@@ -15,6 +15,7 @@ type Querier interface {
 	GetAllProfiles(ctx context.Context) ([]Profile, error)
 	GetCurrentProfile(ctx context.Context) (Profile, error)
 	GetSessions(ctx context.Context) ([]Session, error)
+	GetSessionsWithProfile(ctx context.Context) ([]GetSessionsWithProfileRow, error)
 	ResetCurrentProfile(ctx context.Context) error
 	ResetProfiles(ctx context.Context) error
 	ResetSessions(ctx context.Context) error

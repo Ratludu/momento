@@ -17,7 +17,7 @@ var profilesCmd = &cobra.Command{
 	Short: "Show all profiles that have been registered.",
 	Long: `Default is to show all profiles that have been regisered for a user. 
 For example:
-mnt profiles
+momento profiles
 - work
 - study (current)
 - personal project
@@ -44,7 +44,8 @@ mnt profiles
 				log.Fatal(err)
 			}
 			fmt.Println("Profile Created")
-			fmt.Println(profile)
+			fmt.Println("	- Name:", profile.ProfileName)
+			fmt.Println("")
 		}
 
 		if set != "" {

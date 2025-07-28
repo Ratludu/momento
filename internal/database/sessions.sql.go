@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"database/sql"
 )
 
 const closeSession = `-- name: CloseSession :one
@@ -84,6 +85,56 @@ func (q *Queries) GetSessions(ctx context.Context) ([]Session, error) {
 			&i.Note,
 			&i.Start,
 			&i.End,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getSessionsWithProfile = `-- name: GetSessionsWithProfile :many
+SELECT 
+	s.id AS session_id,
+	s.start AS session_start,
+	s.end AS session_end,
+	p.id AS profile_id,
+	p.profile_name
+FROM
+	sessions AS s
+LEFT JOIN 
+	profiles AS p ON s.profile_id = p.id
+`
+
+type GetSessionsWithProfileRow struct {
+	SessionID    int64          `json:"session_id"`
+	SessionStart string         `json:"session_start"`
+	SessionEnd   string         `json:"session_end"`
+	ProfileID    sql.NullInt64  `json:"profile_id"`
+	ProfileName  sql.NullString `json:"profile_name"`
+}
+
+func (q *Queries) GetSessionsWithProfile(ctx context.Context) ([]GetSessionsWithProfileRow, error) {
+	rows, err := q.db.QueryContext(ctx, getSessionsWithProfile)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetSessionsWithProfileRow
+	for rows.Next() {
+		var i GetSessionsWithProfileRow
+		if err := rows.Scan(
+			&i.SessionID,
+			&i.SessionStart,
+			&i.SessionEnd,
+			&i.ProfileID,
+			&i.ProfileName,
 		); err != nil {
 			return nil, err
 		}
