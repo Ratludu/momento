@@ -38,6 +38,7 @@ var statsCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		tHour := 1 * time.Hour
 		var mins time.Duration
 		for p := range profiles {
 			mins = 0.0
@@ -50,7 +51,14 @@ var statsCmd = &cobra.Command{
 				}
 
 			}
-			fmt.Printf("	- Profile: %s Total: %.2f minutes\n", profiles[p].ProfileName, mins.Minutes())
+
+			if mins > tHour {
+
+				fmt.Printf("	- Profile: %s Total: %.2f hours\n", profiles[p].ProfileName, mins.Hours())
+			} else {
+
+				fmt.Printf("	- Profile: %s Total: %.2f minutes\n", profiles[p].ProfileName, mins.Minutes())
+			}
 
 		}
 
